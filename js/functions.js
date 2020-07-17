@@ -139,8 +139,8 @@ loadingData().then((dataset) => {
 		let basic = ((Math.PI * 2)/10) * j;
 		let obj = {
 			characterDetails: characters[j],
-			x: xCenter + 100 * Math.cos(basic),
-			y: yCenter + 100 * Math.sin(basic)
+			x: xCenter + 50 * Math.cos(basic),
+			y: yCenter + 50 * Math.sin(basic)
 		}
 		fixedNodesMap.set(characters[j].characterID, obj);
 		fixedNodes.push(obj);
@@ -155,27 +155,39 @@ loadingData().then((dataset) => {
 		return (!fixedNodesMap.has(x.character1)||(!fixedNodesMap.has(x.character2)));
 	});
 
-	let neighbors = createNeighbors(characters, edgesNoFixedNodes, fixedNodesMap);
-	console.log(neighbors.length);
-	console.log(neighbors);
+//	let neighbors = createNeighbors(characters, edgesNoFixedNodes, fixedNodesMap);
+//	console.log(neighbors.length);
+//	console.log(neighbors);
 
 	console.log(edgesNoFixedNodes.length);
 	console.log(edgesFiltered);
-	drawGraph(fixedNodesMap, edgesFiltered);
+	let nodesCoords = setRandomPosition(characters);
+	drawGraph(nodesCoords, singleEdges);
+//	drawGraph(fixedNodesMap, edgesFiltered);
 });
 
 //ipotesi: i vicini di un nodo sono i nodi con un arco in comune al nodo stesso
 //insieme di nodi fissi: il 10% dei nodi con più legami
 
 var drawNode = function(node){
-	svg.append('circle').style('stroke', 'gray').style('fill', 'black').attr('class', "class" + node.characterDetails.characterID.toString()).attr('r', 6).attr('cx', node.x).attr('cy', node.y).on('click', () => {
-		d3.select('.class' + node.characterDetails.characterID.toString()).transition().duration(900).attr('r', 10);
+	node.firstTime = false;
+	svg.append('circle').style('stroke', 'red').style('fill', 'red').attr('class', "class" + node.characterDetails.characterID.toString()).attr('r', node.characterDetails.size / 500).attr('cx', node.x).attr('cy', node.y).on('click', () => {
+		node.firstTime = ! node.firstTime;
+		if(node.firstTime){
+			d3.select('.class' + node.characterDetails.characterID.toString()).transition().duration(900).attr('r', node.characterDetails.size / 250);
+			svg.selectAll('.classLine' + node.characterDetails.characterID.toString()).transition().duration(400).style('stroke-width', 20).style('stroke', 'red');
+			
+		}else{
+			d3.select('.class' + node.characterDetails.characterID.toString()).transition().duration(900).attr('r', node.characterDetails.size / 500);
+			svg.selectAll('.classLine' + node.characterDetails.characterID.toString()).transition().duration(400).style('stroke-width', 20).style('stroke', 'lightgreen');
+		
+		}
 		console.log(node.characterDetails);
 	});
 }
 
-var drawLine = function(x1, y1, x2, y2){
-	svg.append('line').style('stroke', 'lightgreen').style('stroke-width', 2).attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
+var drawLine = function(x1, y1, x2, y2, ch1, ch2){
+	svg.append('line').style('stroke', 'lightgreen').style('stroke-width', 0.1).attr('class', "classLine" + ch1.toString()).attr('class', "classLine" + ch2.toString()).attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
 }
 
 var removeDuplicates = function(array){
@@ -222,10 +234,44 @@ var drawGraph = function(nodes, edges){
 	for(let i = 0; i < edges.length; i++){
 		let node1 = nodes.get(edges[i].character1);
 		let node2 = nodes.get(edges[i].character2);
-		drawLine(node1.x, node1.y, node2.x, node2.y);
+		drawLine(node1.x, node1.y, node2.x, node2.y, node1.characterDetails.characterID, node2.characterDetails.characterID);
 	}
 
 	nodes.forEach((x) => {
 		drawNode(x);
 	});
+}
+
+var setRandomPosition = function(nodes){
+	let nodesCoords = new Map();
+	for(let i = 0; i < nodes.length; i++){
+		let coords = appFunctionCalcRandom();
+		let objToInsert = {
+			x: coords.x,
+			y: coords.y,
+			characterDetails: nodes[i]
+		};
+		nodesCoords.set(nodes[i].characterID, objToInsert);
+	}
+	return (nodesCoords);
+
+}
+
+var appFunctionCalcRandom = function(){
+	let minX = Math.ceil(0);
+	let minY = Math.ceil(0);
+
+	let maxX = Math.floor(screenWidth);
+	let maxY = Math.floor(screenHeight);
+
+	let randX = Math.floor(Math.random() * (maxX - minX +1)) + minX;
+	let randY = Math.floor(Math.random() * (maxY - minY +1)) + minY;
+
+	let obj = {
+		x: randX,
+		y: randY
+	};
+	return(obj);
+
+
 }
