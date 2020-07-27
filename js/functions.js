@@ -1,8 +1,21 @@
 const screenHeight = $(window).height();
-const screenWidth = $(window).width();
+const screenWidth = $(window).width()/2;
 const xCenter = screenWidth / 2;
 const yCenter = screenHeight / 2;
-const svg = d3.select('body').append("svg").attr("width", screenWidth).attr("height", screenHeight);
+
+
+
+
+//const svg = d3.select('.home').append("svg").attr("width", screenWidth).attr("height", screenWidth).attr('id', 'timelineGraph');
+//perchè il primo elemento svg è un quadrato della dimensione della larghezza dello schermo
+//const svg2 = d3.select('.home').append("svg").attr("viewBox", [0, screenWidth, screenWidth * 2, screenHeight] ).attr('id', 'socialGraph').attr('class', 'socialGraph');
+
+const svg = d3.select('#timelineGraph').attr("height", screenWidth).attr("width", screenWidth);
+const svg2 = d3.select('#socialGraph').attr("viewBox", [0, screenWidth, screenWidth, screenHeight * 1.5] );
+
+d3.select('#info').attr("width", screenWidth + "px");
+d3.select('#stats').attr("width", screenWidth + "px");
+
 
 var characters = new Map();
 var comicsArray = [];
@@ -11,6 +24,8 @@ var c2C = [];
 var edges = []
 
 var loaded = false
+
+d3.selectAll('svg').style('background-color','#ffffff');
 
 //problema nella generazione dello spring embedder, il problema è che secondo me il disegno di un grafo non è il modo più adatto, la timeline potremmo disegnarla in modo circolare
 
@@ -132,47 +147,9 @@ let loadingData = async function(){
 			return 1;
 		}
 	});
-	let comicsMap2 = new Map();
-	for(let i = 0; i < ch2co.length; i++){
-		let obj0 = ch2co[i];
-		if(!comicsMap2.has(obj0.comicID)){
-			comicsMap2.set(obj0.comicID, obj0);
-			let j = i;
-			let goAhead = false;
-			let appList = [];
-			while((!goAhead)&&(j < ch2co.length)){
-				appList.push(ch2co[j]);
-				if(((j+1) < ch2co.length)&&(ch2co[j].comicID !== ch2co[j+1].comicID)){
-					goAhead = true;
-				}else{
-					j++;
-				}
-			}
-			if(appList.length > 1){
-				//dobbiamo creare tutti i vari accoppiamenti
-				for (let h = 0; h < appList.length; h++){
-					for(let k = h + 1; k < appList.length; k++){
-						let objToInsert = {
-							character1: appList[h].characterID,
-							character2: appList[k].characterID,
-							comic: appList[k].comicID,
-							l: 1,
-							k1: 1,
-							k2: 1
-						}
-					/*	let objToInsertInverse = {
-							character1: appList[k].characterID,
-							character2: appList[h].characterID
-						};*/
-					//	if((!edges.includes(objToInsert))&&(!edges.includes(objToInsertInverse))){
-							edges.push(objToInsert);
-					//	}
-					}
-				}
-			//	console.log(edges);
-			}
-		}
-	}
+	
+	edges = createEdges(ch2co);
+
 /*	let edgesNoReplicas = [];
 	for(let i = 0; i < edges.length; i++){
 		let objToInsert = edges[i];
@@ -184,12 +161,32 @@ let loadingData = async function(){
 			edgesNoReplicas.push(objToInsert);
 		}
 	}*/
-	
-	let dateMapArray = setupDatasetTimeline(edges);
-
+	let chID = 1011490;
+	let chID2 = 1009220;
+	let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
+	let edgesSingularCharacter = createEdgesComics(ch2co, chID2);
+	let graph = setupDatasetRelevance(edgesSingularCharacter, chID2, characters);
+	let obj = {
+		name: characters.get(chID).name,
+		children: dateMapArray
+	}
+	console.log(graph);
+	createGraph(graph);
+//	let partition = createPartition(obj);
 //	console.log(dateMap);
-	console.log(dateMapArray);
+//	console.log(partition);
 
+//	partition.each(x => x.current = x);
+//	createCircle(obj);
+/*	setTimeout(() => {
+		console.log('aggiornare');
+		let mapArray = setupDatasetTimelineTree(edges, 1009220 ,characters);
+		let obj = {
+			name: characters.get(1009220).name,
+			children: mapArray
+		}
+		createCircle(obj);
+	}, 30000);*/
 	let dataset = {
 		comics: comicsArray,
 		characters: ch,
@@ -201,92 +198,10 @@ let loadingData = async function(){
 
 }
 
-var setupDatasetTimeline = function(edges){
-	let chID = 1011490;
-	let edgesFilteredCharacter = filterEdgesCharacter(edges, chID);
-	let dateMap = new Map();
-	console.log(edgesFilteredCharacter.length);
-	for(let i = 0; i < edgesFilteredCharacter.length; i++){
-		let singleEdge = edgesFilteredCharacter[i];
-		let comic = comicsMap.get(singleEdge.comic);
-		if((comic.date !== null)&&(comic.date !== undefined)&&(comic.date.toString().length === 4)){
-			if(dateMap.has(comic.date)){
-				let objToInsert = dateMap.get(comic.date);
-				if(singleEdge.character1 === chID){
-					objToInsert.characters.push(singleEdge.character2);
-				}else{
-					objToInsert.characters.push(singleEdge.character1);
-				}
-				dateMap.set(comic.date, objToInsert);
-			}else{
-				let objToInsert = {
-					date: comic.date
-				}
-				if(singleEdge.character1 === chID){
-					objToInsert.characters = [singleEdge.character2];
-				}else{
-					objToInsert.characters = [singleEdge.character1];
-				}
-				dateMap.set(comic.date, objToInsert);
-			}
-		}
-	}
-	let dateMapArray = [];
-	dateMap.forEach((v, key) => {
-		let obj = {
-			date: key,
-			value: v
-		};
-		dateMapArray.push(obj);
-	});
-	dateMapArray = dateMapArray.sort((a, b) => {
-		if(a.date < b.date){
-			return -1;
-		}else{
-			return +1;
-		}
-	});
-	for(let i = 0; i < dateMapArray.length; i++){
-		let characters = dateMapArray[i];
-		let arrayCharacters = characters.value.characters.sort((a, b) => {
-			if(a < b){
-				return -1;
-			}else{
-				return +1;
-			}
-		});
-		let occ = 1;
-		let newArrayCharacters = [];
-		for(let j = 0; j < arrayCharacters.length; j++){
-			if(arrayCharacters[j] === arrayCharacters[j+1]){
-				occ++;
-			}else{
-				//vuol dire che il successivo elemento è diverso e quindi dobbiamo salvarlo
-				let objToInsert = {
-					characterID: arrayCharacters[j],
-					times: occ
-				};
-				newArrayCharacters.push(objToInsert);
-				occ = 1;
-			}
-		}
-		dateMapArray[i] = {
-			date: characters.date,
-			characters: newArrayCharacters
-		}
-	}
-	return (dateMapArray);
-}
-
-var filterEdgesCharacter = function(edges, characterID){
-	edges = edges.filter((x) => {
-		return((x.character1 === characterID)||(x.character2 === characterID));
-	});
-	return(edges);
-}
-
 loadingData().then((dataset) => {
+	/*
 	console.log(dataset);
+	
 	let characters = dataset.characters;
 	let edges = dataset.edges;
 
@@ -341,7 +256,7 @@ loadingData().then((dataset) => {
 	let nodesCoords = setRandomPosition(top200);
 
 
-	drawGraph(nodesCoords, edgesFiltered).then((ok) => {
+/*	drawGraph(nodesCoords, edgesFiltered).then((ok) => {
 		let nodesList = [];
 
 		nodesCoords.forEach((x) => {
@@ -370,7 +285,7 @@ loadingData().then((dataset) => {
 		  		console.log('drawed');
 		  	});
 		}*/
-	});
+//	});
 //	drawGraph(fixedNodesMap, edgesFiltered);
 	
 	
@@ -379,7 +294,7 @@ loadingData().then((dataset) => {
 
 //ipotesi: i vicini di un nodo sono i nodi con un arco in comune al nodo stesso
 //insieme di nodi fissi: il 10% dei nodi con più legami
-
+/*
 var drawNode = function(node){
 	node.firstTime = false;
 	svg.append('circle').style('stroke', 'red').style('fill', 'red').attr('class', "class" + node.characterDetails.characterID.toString()).attr('r', node.characterDetails.size / 500).attr('cx', node.x).attr('cy', node.y).on('click', () => {
@@ -400,23 +315,9 @@ var drawNode = function(node){
 var drawLine = function(x1, y1, x2, y2, ch1, ch2){
 	svg.append('line').style('stroke', 'lightgreen').style('stroke-width', 0.1).attr('class', "classLine" + ch1.toString()).attr('class', "classLine" + ch2.toString()).attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
 }
+*/
 
-var removeDuplicates = function(array){
-	let mapApp = new Map();
-	let edges = [];
-	for(let i = 0; i < array.length; i++){
-		let key = array[i].character1.toString() + "|" + array[i].character2.toString();
-		let inverseKey = array[i].character2.toString() + "|" + array[i].character1.toString();
-		if((!mapApp.has(key))&&(!mapApp.has(inverseKey))){
-		//	console.log('da aggiungere');
-			edges.push(array[i]);
-			mapApp.set(key, array[i]);
-		}
-	}
-//	console.log(edges);
-	return(edges);
-}
-
+/*
 var createNeighbors = function(nodes, edges, fixedNodes){
 	let neighbors = [];
 	for(let i = 0; i < nodes.length; i++){
@@ -540,4 +441,4 @@ var springForce = function(node, nodes, edges){
 
 var calcDist = function(p1, p2){
 	return (Math.sqrt((p2.x - p1.x)*(p2.x - p1.x)+(p2.y - p1.y)*(p2.y - p1.y)));
-}
+}*/

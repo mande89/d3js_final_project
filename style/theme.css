@@ -1,0 +1,39 @@
+body {
+	background-color: black !important;
+}
+
+.socialGraph{
+	background-color:black !important;
+}
+
+.home{
+	background-color: black !important;
+}
+
+.nav-custom{
+	width: 70% !important;
+}
+
+.table-custom{
+	margin-top: 150px;
+}
+
+
+
+.characters-form{
+	margin-top: 10px !important;
+
+}
+
+.container-new{
+	max-width: 100% !important;
+}
+
+.stats{
+	background-color: white !important;
+}
+
+.info{
+	width: 500px;
+}
+
