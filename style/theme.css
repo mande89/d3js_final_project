@@ -1,13 +1,13 @@
 body {
-	background-color: black !important;
+	background-color: #343a40 !important;
 }
 
 .socialGraph{
-	background-color:black !important;
+	background-color: #343a40 !important;
 }
 
 .home{
-	background-color: black !important;
+	background-color: #343a40 !important;
 }
 
 .nav-custom{
@@ -21,8 +21,23 @@ body {
 
 
 .characters-form{
-	margin-top: 10px !important;
+	display: inline-block !important;
+}
 
+.characters-button{
+	color: white !important;
+	border-color: white !important;
+}
+
+.characters-button:hover{
+	background-color: white !important;
+	color: #343a40 !important;
+	border-color: #343a40 !important;
+}
+
+.size-custom{
+	background-color: #212529 !important;
+	color: white !important;
 }
 
 .container-new{

@@ -7,8 +7,9 @@
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 		<script src="http://d3js.org/d3.v5.min.js" charset="utf-8"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-		
+		<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.5/dist/latest/bootstrap-autocomplete.min.js"></script>
 		
 	</head>
 	
@@ -23,8 +24,8 @@
 		    	</div>
 		  	
 				<form class="form-inline characters-form">
-			    	<input class="form-control" type="input" placeholder="Characters">
-			    	<button class="btn btn-outline-success" type="submit">OK</button>
+			    	<input class="form-control" id="charactersInput" type="input" value="Captain America">
+			    	<button class="btn btn-outline-success characters-button" id="ok">OK</button>
 			  	</form>
 		  	</div>
 		</nav>
@@ -43,8 +44,20 @@
 					<svg id="socialGraph" class="socialGraph"></svg>		
 				</div>
 				<div class="col">
-					<div id="info" class="container">
-						<table class="table table-dark table-custom">
+
+					<div id="info" class="container table-custom">
+						<div class="input-group mb-3">
+						  <div class="input-group-prepend">
+						    <label class="input-group-text size-custom" for="inputGroupSelect01">Size</label>
+						  </div>
+						  <select class="custom-select" id="graphSize">
+						    <option value="1" selected>Small</option>
+						    <option value="2">Medium</option>
+						    <option value="3">Large</option>
+						    <option value="4">Full</option>
+						  </select>
+						</div>
+						<table class="table table-dark ">
 							<tbody>
 								<tr>
 									<th scope="row"> Hero </th>

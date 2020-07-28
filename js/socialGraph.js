@@ -1,8 +1,8 @@
 
-//0 = good , 1 = not defined, 2 = bad
-var colorList = ['#00bfff', '#d3d3d3', '#dc143c']
+//0 = good , 1 = not defined, 2 = bad, 3 = neutral
+var colorList = ['#0079ba', '#a39d9d', '#d32035', '#af7c2b']
 
-var setupDatasetRelevance = function(edges, chID, charactersMap){
+var setupDatasetRelevance = function(edges, chID, charactersMap, size){
 	console.log(edges);
 //	let characterNeighbors = findNeighbors(edges, chID, charactersMap);
 //	console.log(characterNeighbors);
@@ -11,6 +11,7 @@ var setupDatasetRelevance = function(edges, chID, charactersMap){
 		return ((x.character1 === chID)||(x.character2 === chID)||(characterNeighbors.has(x.character1)&&characterNeighbors.has(x.character2)));
 	});*/
 	console.log(edges);
+	console.log(size);
 	let edgesNoReplicas = getEdgesNoReplicasWithTimes(edges);
 	console.log(edgesNoReplicas);
 	let arrayCharacters = [];
@@ -38,6 +39,46 @@ var setupDatasetRelevance = function(edges, chID, charactersMap){
 	characters.forEach((x) => {
 		arrayCharacters.push(x);
 	});
+
+	let arraySize = arrayCharacters.length;
+	switch (size){
+		case 1: {
+			arraySize = arraySize / 10;
+			break;
+		}
+		case 2: {
+			arraySize = arraySize / 6;
+			break;
+		}
+		case 3: {
+			arraySize = arraySize / 2;
+			break;
+		}
+		default:{
+			break; 
+		}
+	}
+
+	arrayCharacters = arrayCharacters.sort((a, b) => {
+		if(a.value > b.value){
+			return -1;
+		}else{
+			return +1;
+		}
+	});
+	console.log(arraySize);
+	arrayCharacters = arrayCharacters.slice(0, arraySize);
+
+	let arrayMapApp = new Map();
+	arrayCharacters.forEach((x) => {
+		arrayMapApp.set(x.characterID, x);
+	});
+	console.log(arrayMapApp);
+	console.log(edgesNoReplicas);
+	edgesNoReplicas = edgesNoReplicas.filter((x) => {
+		return ((arrayMapApp.has(x.target))&&(arrayMapApp.has(x.source)));
+	});
+
 	let obj = {
 		edges: edgesNoReplicas,
 		characters: arrayCharacters
@@ -48,16 +89,18 @@ var setupDatasetRelevance = function(edges, chID, charactersMap){
 var createGraph = function(data){
 //	let color = d3.scaleOrdinal(d3.schemeCategory20);
 	svg2.selectAll('*').remove();
-	let simulation = d3.forceSimulation().force('link', d3.forceLink().id((x) => { return x.characterID; })).force('charge', d3.forceManyBody()).force('center', d3.forceCenter(screenWidth / 2, screenWidth + (screenHeight * 0.5)));
-	let edge = svg2.append("g").attr('class', 'edge').selectAll('line').data(data.edges).enter().append('line').attr('stroke-width', (x) => { return Math.sqrt(x.times/5000)}).attr('stroke', 'white');
+	let simulation = d3.forceSimulation().force('link', d3.forceLink().id((x) => { return x.characterID; })).force('charge', d3.forceManyBody().distanceMax(screenHeight * 0.4).strength(-50)).force('center', d3.forceCenter(screenWidth / 2, screenWidth + (screenHeight * 0.5))).force('collision', d3.forceCollide((x) => {return Math.sqrt(x.value/60);}).iterations(300).strength(1));
+	let edge = svg2.append("g").attr('class', 'edge').selectAll('line').data(data.edges).enter().append('line').attr('stroke-width', (x) => { return Math.sqrt(x.times/5000)}).attr('stroke', '#f1efe2');
 	let node = svg2.append("g").attr('class', 'node').selectAll('g').data(data.characters).enter().append('g');
 	//usare la funzione d3.scale;
 	let nodeDraw = node.append('circle').attr('r', (x) => {return Math.sqrt(x.value/60);}).attr('fill', (x) => {
 		if(x.alignment !== undefined){
 			if(x.alignment.toLowerCase() === 'good'){
 				return colorList[0];
-			}else{
+			}else if(x.alignment.toLowerCase() === 'bad'){
 				return colorList[2];
+			}else{
+				return colorList[3];
 			}
 		}else{
 			return colorList[1];
@@ -75,7 +118,11 @@ var createGraph = function(data){
 //	node.append('title').text((x) => {return x.name});
 	let numberIteration = 0;
 	let change = function(){
-		console.log('change');
+	//	console.log(numberIteration);
+		if(numberIteration === 10){
+			simulation.stop();
+		}
+		numberIteration++;
 		edge.attr('x1', (x) => {return x.source.x;}).attr('y1', (x) => {return x.source.y;}).attr('x2', (x) => {return x.target.x;}).attr('y2', (x) => {return x.target.y;});
 		node.attr('transform', (x) => {
 			return ("translate(" + x.x + "," + x.y + ")");

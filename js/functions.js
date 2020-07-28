@@ -21,7 +21,9 @@ var characters = new Map();
 var comicsArray = [];
 var comicsMap = new Map();
 var c2C = [];
-var edges = []
+var edges = [];
+var charactersAligmentsMap = new Map();
+var ch2co;
 
 var loaded = false
 
@@ -31,7 +33,7 @@ d3.selectAll('svg').style('background-color','#ffffff');
 
 let loadingData = async function(){
 
-	charactersAligmentsMap = new Map();
+	
 
 	chInfo = await d3.csv("../data/marvel_characters_info.csv", d3.autoType);
 	chInfo.forEach((x) => {
@@ -101,6 +103,14 @@ let loadingData = async function(){
 	console.log('charactersALignemntAdded = ' + counter);
 	console.log(characters);
 	console.log(ch.length);
+
+	let charactersString = [];
+	characters.forEach((x) => {
+		charactersString.push(x.name);
+	})
+
+	
+
 	co = await d3.csv("../data/comics.csv", d3.autoType);
 	co.forEach((x) => {
 		let obj = {
@@ -161,15 +171,42 @@ let loadingData = async function(){
 			edgesNoReplicas.push(objToInsert);
 		}
 	}*/
-	let chID = 1011490;
-	let chID2 = 1009220;
+
+	$('#graphSize').change(((x) => {
+		let graphSize = parseInt($('#graphSize').val());
+		
+		let chID = getID(characters, $('#charactersInput').val());
+		let edgesSingularCharacter = createEdgesComics(ch2co, chID);
+		let graph = setupDatasetRelevance(edgesSingularCharacter, chID, characters, graphSize);
+		createGraph(graph);
+	}))
+
+	$('#charactersInput').autocomplete({
+		source: charactersString
+	});
+	$('#ok').on('click', function(event){
+		event.preventDefault();
+		console.log($('#charactersInput').val());
+		let graphSize = parseInt($('#graphSize').val());
+		
+		let chID = getID(characters, $('#charactersInput').val());
+		let edgesSingularCharacter = createEdgesComics(ch2co, chID);
+		let graph = setupDatasetRelevance(edgesSingularCharacter, chID, characters, graphSize);
+		createGraph(graph);
+		//bug nella creazione del grafo quando si cambia personaggio
+	});
+
+	let chID = getID(characters, $('#charactersInput').val());
+	console.log($('#charactersInput').val());
+	console.log(chID);
+	let chID2 = getID(characters, $('#charactersInput').val());
 	let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
-	let edgesSingularCharacter = createEdgesComics(ch2co, chID2);
-	let graph = setupDatasetRelevance(edgesSingularCharacter, chID2, characters);
-	let obj = {
+	let edgesSingularCharacter = createEdgesComics(ch2co, chID);
+	let graph = setupDatasetRelevance(edgesSingularCharacter, chID2, characters, 1);
+/*	let obj = {
 		name: characters.get(chID).name,
 		children: dateMapArray
-	}
+	}*/
 	console.log(graph);
 	createGraph(graph);
 //	let partition = createPartition(obj);
@@ -197,6 +234,18 @@ let loadingData = async function(){
 	});
 
 }
+
+var getID = function(characters, ID){
+	let id;
+	console.log(characters);
+	characters.forEach((x) => {
+		if(x.name === ID){
+			id = x.characterID;
+		}
+	})
+	return id;
+}
+
 
 loadingData().then((dataset) => {
 	/*
