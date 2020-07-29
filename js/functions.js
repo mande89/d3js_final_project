@@ -10,8 +10,9 @@ const yCenter = screenHeight / 2;
 //perchè il primo elemento svg è un quadrato della dimensione della larghezza dello schermo
 //const svg2 = d3.select('.home').append("svg").attr("viewBox", [0, screenWidth, screenWidth * 2, screenHeight] ).attr('id', 'socialGraph').attr('class', 'socialGraph');
 
-const svg = d3.select('#timelineGraph').attr("height", screenWidth).attr("width", screenWidth);
-const svg2 = d3.select('#socialGraph').attr("viewBox", [0, screenWidth, screenWidth, screenHeight * 1.5] );
+const svg = d3.select('#timelineGraph').attr("height", screenWidth/2).attr("width", screenWidth);
+const svg2 = d3.select('#socialGraph').attr("viewBox", [0, screenWidth, screenWidth, screenHeight * 1.5]);
+const svg3 = d3.select('#lineChart').attr("viewBox", [screenWidth, 0, screenWidth, screenWidth]);
 
 d3.select('#info').attr("width", screenWidth + "px");
 d3.select('#stats').attr("width", screenWidth + "px");
@@ -27,7 +28,7 @@ var ch2co;
 
 var loaded = false
 
-d3.selectAll('svg').style('background-color','#ffffff');
+//d3.selectAll('svg').style('background-color','#ffffff');
 
 //problema nella generazione dello spring embedder, il problema è che secondo me il disegno di un grafo non è il modo più adatto, la timeline potremmo disegnarla in modo circolare
 
@@ -192,6 +193,9 @@ let loadingData = async function(){
 		let chID = getID(characters, $('#charactersInput').val());
 		let edgesSingularCharacter = createEdgesComics(ch2co, chID);
 		let graph = setupDatasetRelevance(edgesSingularCharacter, chID, characters, graphSize);
+
+		let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
+		createChart(dateMapArray);
 		createGraph(graph);
 		//bug nella creazione del grafo quando si cambia personaggio
 	});
@@ -207,6 +211,8 @@ let loadingData = async function(){
 		name: characters.get(chID).name,
 		children: dateMapArray
 	}*/
+	console.log(dateMapArray);
+	createChart(dateMapArray);
 	console.log(graph);
 	createGraph(graph);
 //	let partition = createPartition(obj);

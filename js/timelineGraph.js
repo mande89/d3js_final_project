@@ -189,3 +189,41 @@ var createCircle = function(data){
     return `rotate(${x - 90}) translate(${y},0) rotate(${x <= 180 ? 0 : 180})`;
   }
 }
+
+var createChart = function(data){
+  svg3.selectAll('*').remove();
+  let newData = [];
+  let year = d3.min(data, (x) => {return x.name});
+  let maxYear = d3.max(data, (x) => {return x.name});
+  let i = 0;
+  while(year <= maxYear){
+    if(data[i].name === year){
+      let obj = {
+        name: new Date(data[i].name, 0, 1),
+        length: data[i].length
+      };
+      newData.push(obj);
+      i++;
+    }else{
+      let obj = {
+        name: new Date(year, 0, 1),
+        length: 0
+      };
+      newData.push(obj);
+    }
+    year++;
+  }
+  console.log(newData);
+  let maxValue = d3.max(newData, (x) => {return x.length});
+
+  let width = screenWidth * 0.7;
+  let height = screenWidth * 0.7;
+  svg3.append('g').attr('transform', 'translate(' + (screenWidth + screenWidth * 0.15) + "," + (screenWidth * 0.15) + ')');
+  let xFun = d3.scaleTime().domain(d3.extent(newData, (x) => {return x.name;})).range([screenWidth + screenWidth * 0.15, screenWidth + screenWidth * 0.15 + width]);
+  svg3.append('g').attr('class', 'chartAxis').attr('transform', 'translate(0,' + height + ')').call(d3.axisBottom(xFun));
+
+  let yFun = d3.scaleLinear().domain([0, maxValue]).range([height, screenWidth * 0.1]);
+  svg3.append('g').attr('class', 'chartAxis').attr('transform', 'translate(' + (screenWidth + screenWidth*0.15) + ', 0)').call(d3.axisLeft(yFun));
+
+  svg3.append('path').datum(newData).attr('class', 'chartLine').attr('d', d3.line().x((x) => {return xFun(x.name);}).y((x) => {return yFun(x.length)}))
+}

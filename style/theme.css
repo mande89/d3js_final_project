@@ -18,7 +18,15 @@ body {
 	margin-top: 150px;
 }
 
+.chartLine{
+	fill: none;
+	stroke: #0079ba;
+	stroke-width: 0.5;
+}
 
+.chartAxis{
+	color: #a39d9d;
+}
 
 .characters-form{
 	display: inline-block !important;
