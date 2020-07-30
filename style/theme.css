@@ -20,8 +20,28 @@ body {
 
 .chartLine{
 	fill: none;
-	stroke: #0079ba;
 	stroke-width: 0.5;
+}
+
+.ui-autocomplete{
+	margin-top: 2px;
+	list-style: none;
+	background-color: white;
+	border: 1px solid grey;
+	border-radius: 5px;
+}
+
+.ui-autocomplete > li{
+	padding: 0.5%;
+}
+
+.ui-autocomplete > li:hover{
+	background-color: #343a40;
+	color: white;
+}
+
+.ui-helper-hidden-accessible{
+	display: none;
 }
 
 .chartAxis{

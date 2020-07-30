@@ -1,15 +1,5 @@
-
-//0 = good , 1 = not defined, 2 = bad, 3 = neutral
-var colorList = ['#0079ba', '#a39d9d', '#d32035', '#af7c2b']
-
 var setupDatasetRelevance = function(edges, chID, charactersMap, size){
 	console.log(edges);
-//	let characterNeighbors = findNeighbors(edges, chID, charactersMap);
-//	console.log(characterNeighbors);
-//	console.log(characterNeighbors.size);
-/*	let edgesFiltered = edges.filter((x) => {
-		return ((x.character1 === chID)||(x.character2 === chID)||(characterNeighbors.has(x.character1)&&characterNeighbors.has(x.character2)));
-	});*/
 	console.log(edges);
 	console.log(size);
 	let edgesNoReplicas = getEdgesNoReplicasWithTimes(edges);
@@ -93,7 +83,7 @@ var createGraph = function(data){
 	let rScaling = d3.scaleLinear().domain([d3.min(data.characters, (x) => {return x.value}), d3.max(data.characters, (x) => {return x.value})]).range([2, 15]);
 	let eScaling = d3.scaleLinear().domain([d3.min(data.edges, (x) => {return x.times}), d3.max(data.edges, (x) => {return x.times})]).range([0.01, 0.4]);
 
-	let simulation = d3.forceSimulation().force('link', d3.forceLink().id((x) => { return x.characterID; })).force('charge', d3.forceManyBody().distanceMax(screenHeight * 0.4).strength(-50)).force('center', d3.forceCenter(screenWidth / 2, screenWidth + (screenHeight * 0.5))).force('collision', d3.forceCollide((x) => {return Math.sqrt(x.value/60);}).iterations(300).strength(1));
+	let simulation = d3.forceSimulation().force('link', d3.forceLink().id((x) => { return x.characterID; })).force('charge', d3.forceManyBody().distanceMax(screenHeight * 0.4).strength(-50)).force('center', d3.forceCenter(screenWidth / 2, screenWidth + (screenHeight * 0.5))).force('collision', d3.forceCollide((x) => {return rScaling(x.value) * 2;}).iterations(300).strength(1));
 	let edge = svg2.append("g").attr('class', 'edge').selectAll('line').data(data.edges).enter().append('line').attr('stroke-width', (x) => { return eScaling(x.times)}).attr('stroke', '#f1efe2');
 	let node = svg2.append("g").attr('class', 'node').selectAll('g').data(data.characters).enter().append('g');
 	//usare la funzione d3.scale;

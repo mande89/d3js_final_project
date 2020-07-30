@@ -190,12 +190,35 @@ var createCircle = function(data){
   }
 }
 
-var createChart = function(data){
+var createChart = function(data, character){
   svg3.selectAll('*').remove();
+  svg3.append('div').attr('class', 'tooltip').style('opacity', 0);
+
   let newData = [];
   let year = d3.min(data, (x) => {return x.name});
   let maxYear = d3.max(data, (x) => {return x.name});
   let i = 0;
+  let color = colorList[1];
+  if(character.alignment !== undefined){
+    switch(character.alignment.toLowerCase()){
+      case 'good': {
+        color = colorList[0];
+        break;
+      }
+      case 'bad': {
+        color = colorList[2];
+        break;
+      }
+      case 'neutral': {
+        color = colorList[3];
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+  
   while(year <= maxYear){
     if(data[i].name === year){
       let obj = {
@@ -225,5 +248,14 @@ var createChart = function(data){
   let yFun = d3.scaleLinear().domain([0, maxValue]).range([height, screenWidth * 0.1]);
   svg3.append('g').attr('class', 'chartAxis').attr('transform', 'translate(' + (screenWidth + screenWidth*0.15) + ', 0)').call(d3.axisLeft(yFun));
 
-  svg3.append('path').datum(newData).attr('class', 'chartLine').attr('d', d3.line().x((x) => {return xFun(x.name);}).y((x) => {return yFun(x.length)}))
+
+  let box = svg3.append('div').attr('class', 'tooltip').style('opacity', 0);
+  svg3.append('path').datum(newData).attr('class', 'chartLine').style('stroke', color).attr('d', d3.line().x((x) => {return xFun(x.name);}).y((x) => {return yFun(x.length)}));
+  svg3.selectAll('dot').data(newData).enter().append('circle').attr('class', 'point').style('fill', color).attr('r', 3).attr('cx', (x) => {return xFun(x.name);}).attr('cy', (x) => {return yFun(x.length)}).append('svg:title').text((x) => {return ("During " + x.name.getFullYear() + " " + character.name + " has interacted with " + x.length + " unique characters.")})/*.on('mouseover', (event) => {
+    box.transition().duration(300).style('opacity', 0.6);
+    box.html("<p>During " + event.name.getFullYear() + " " + event.length + " relations.").style('left', (d3.event.pageX) + "px</p>").style('top', (d3.event.pageY - 20) + "px");
+  });*/
+
+
+
 }

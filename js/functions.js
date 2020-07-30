@@ -3,7 +3,13 @@ const screenWidth = $(window).width()/2;
 const xCenter = screenWidth / 2;
 const yCenter = screenHeight / 2;
 
+//0 = good , 1 = not defined, 2 = bad, 3 = neutral
+const colorList = ['#0079ba', '#a39d9d', '#d32035', '#af7c2b']
 
+
+//default values on reload
+$('#graphSize').val(1);
+$('#charactersInput').val('Captain America');
 
 
 //const svg = d3.select('.home').append("svg").attr("width", screenWidth).attr("height", screenWidth).attr('id', 'timelineGraph');
@@ -195,7 +201,7 @@ let loadingData = async function(){
 		let graph = setupDatasetRelevance(edgesSingularCharacter, chID, characters, graphSize);
 
 		let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
-		createChart(dateMapArray);
+		createChart(dateMapArray, characters.get(chID));
 		createGraph(graph);
 		//bug nella creazione del grafo quando si cambia personaggio
 	});
@@ -203,16 +209,16 @@ let loadingData = async function(){
 	let chID = getID(characters, $('#charactersInput').val());
 	console.log($('#charactersInput').val());
 	console.log(chID);
-	let chID2 = getID(characters, $('#charactersInput').val());
+//	let chID2 = getID(characters, $('#charactersInput').val());
 	let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
 	let edgesSingularCharacter = createEdgesComics(ch2co, chID);
-	let graph = setupDatasetRelevance(edgesSingularCharacter, chID2, characters, 1);
+	let graph = setupDatasetRelevance(edgesSingularCharacter, chID, characters, 1);
 /*	let obj = {
 		name: characters.get(chID).name,
 		children: dateMapArray
 	}*/
 	console.log(dateMapArray);
-	createChart(dateMapArray);
+	createChart(dateMapArray, characters.get(chID));
 	console.log(graph);
 	createGraph(graph);
 //	let partition = createPartition(obj);
