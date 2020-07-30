@@ -74,42 +74,85 @@ var setupDatasetTimelineTree = function(edges, chID, charactersMap){
   return (dateMapArray);
 }
 
+var partition = (data) => {
+  console.log(data);
+  const root = d3.hierarchy(data).sum((x) => {return x.value});
+  return d3.partition().size([2 * Math.PI, root.height + 1])(root);
+}
+
 var createCircle = function(data){
 	svg.selectAll('#timelineCircle').remove();
-	partition = data => {
-	  console.log(data);
-	  const root = d3.hierarchy(data).sum(d => d.value);
-	  return d3.partition().size([2 * Math.PI, root.height + 1])(root);
-	}
+	
+  let character = data.character;
+  let color = colorList[1];
+  if(character.alignment !== undefined){
+    switch(character.alignment.toLowerCase()){
+      case 'good': {
+        color = colorList[0];
+        break;
+      }
+      case 'bad': {
+        color = colorList[2];
+        break;
+      }
+      case 'neutral': {
+        color = colorList[3];
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
 
-	color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
-	format = d3.format(",d")
-	width = screenWidth
-	radius = width / 8
-	arc = d3.arc()
-	    .startAngle(d => d.x0)
-	    .endAngle(d => d.x1)
-	    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-	    .padRadius(radius * 1)
-	    .innerRadius(d => d.y0 * radius)
-	    .outerRadius(d => Math.max(d.y0 * (radius * 0.5), d.y1 * radius  - 1))
+  color = 'white';
+
+	let format = d3.format(",d");
+	let width = screenWidth * 0.8;
+	let r = width / 8;
+	let arc = d3.arc().startAngle( (x) => {return x.x0;}).endAngle((x) => {return x.x1;}).padAngle((x) => {return d3.min([(x.x1 - x.x0)/2, 0.005]);}).padRadius(r).innerRadius((x) => {return x.y0 * r;}).outerRadius((x) =>{return d3.max([x.y0 * (r/2), (x.y1 * r) -1]);});
   
   let root = partition(data);
 
-  root.each(d => d.current = d);
+  root.each((x) => {x.current = x});
   console.log(root);
 
 
   //per centrare il cerchio al centro del box
-  const g = svg.append("g").attr("transform", `translate(${width / 2},${width / 2})`).attr('id', 'timelineCircle');
+  const g = svg.append("g").attr("transform", "translate(" + (width / 2) + "," + (width / 2) + ")").attr('id', 'timelineCircle');
 
   const path = g.append("g")
     .selectAll("path")
     .data(root.descendants().slice(1))
     .join("path")
-      .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); })
-      .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0) //per l'opacità, se l'arco ha figli allora va messo più scuro, altrimenti più chiaro
-      .attr("d", d => arc(d.current));
+    .attr('fill', (x) => {
+        while(x.depth > 2){
+          x = x.parent
+        }
+        if(x.depth === 1){
+          return color;
+        }else{
+          return x.data.color  
+        }
+      })
+    .attr('fill-opacity', (x) => {
+      let node = x;
+      while(node.depth > 3){
+        node = node.parent;
+      }
+      if(arcVisible(x.current)){
+        if(x.children){
+          return  0.8;
+        }else{
+          return  0.6;
+        }
+      }else{
+        return 0;
+      }
+    })    
+    .attr("d", (x) => {
+      return arc(x.current);
+    });
 
   path.filter(d => d.children)
       .style("cursor", "pointer")
@@ -121,7 +164,7 @@ var createCircle = function(data){
   const label = g.append("g")
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")
-      .style("user-select", "none")
+      .attr('class', 'label')
     .selectAll("text")
     .data(root.descendants().slice(1))
     .join("text")
@@ -132,7 +175,7 @@ var createCircle = function(data){
 
   const parent = g.append("circle")
       .datum(root)
-      .attr("r", radius)
+      .attr("r", r)
       .attr("fill", "none")
       .attr("pointer-events", "all")
       .on("click", clicked);
@@ -162,7 +205,31 @@ var createCircle = function(data){
       .filter(function(d) {
         return + this.getAttribute("fill-opacity") || arcVisible(d.target);
       })
-        .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
+      .attr("fill-opacity", (x) => {
+          let node = x;
+          while(node.depth > 3){
+            node = node.parent;
+          }
+        //  console.log(node);
+          
+          if(arcVisible(x.target)){
+            if(x.children){
+              if((node.data.opacity !== undefined)&&(node.depth === 3)){
+                return node.data.opacity;
+              }else{
+                return 1
+              }
+            }else{
+              if((node.data.opacity !== undefined)&&(node.depth === 3)){
+                return node.data.opacity - 0.2;
+              }else{
+                return 0.2;
+              }
+            }
+          }else{
+            return 0;
+          }
+        })
         .attrTween("d", d => () => arc(d.current));
 
     label.filter(function(d) {
@@ -179,13 +246,13 @@ var createCircle = function(data){
 
 //per vedere se l'etichetta è visibile o meno
   function labelVisible(d) {
-    return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.05;
+    return (d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.08);
   }
 
 //per ruotare le label
   function labelTransform(d) {
     let x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-    let y = (d.y0 + d.y1) / 2 * radius;
+    let y = (d.y0 + d.y1) / 2 * r;
     return `rotate(${x - 90}) translate(${y},0) rotate(${x <= 180 ? 0 : 180})`;
   }
 }

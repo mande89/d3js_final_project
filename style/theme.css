@@ -18,6 +18,15 @@ body {
 	margin-top: 150px;
 }
 
+.table{
+	border-radius: 5px;
+}
+
+.label{
+	font-size: 12px;
+	user-select: none;
+}
+
 .chartLine{
 	fill: none;
 	stroke-width: 0.5;

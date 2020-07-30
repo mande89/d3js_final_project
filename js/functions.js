@@ -16,7 +16,7 @@ $('#charactersInput').val('Captain America');
 //perchè il primo elemento svg è un quadrato della dimensione della larghezza dello schermo
 //const svg2 = d3.select('.home').append("svg").attr("viewBox", [0, screenWidth, screenWidth * 2, screenHeight] ).attr('id', 'socialGraph').attr('class', 'socialGraph');
 
-const svg = d3.select('#timelineGraph').attr("height", screenWidth/2).attr("width", screenWidth);
+const svg = d3.select('#timelineGraph').attr("height", screenWidth).attr("width", screenWidth);
 const svg2 = d3.select('#socialGraph').attr("viewBox", [0, screenWidth, screenWidth, screenHeight * 1.5]);
 const svg3 = d3.select('#lineChart').attr("viewBox", [screenWidth, 0, screenWidth, screenWidth]);
 
@@ -203,6 +203,13 @@ let loadingData = async function(){
 		let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
 		createChart(dateMapArray, characters.get(chID));
 		createGraph(graph);
+		let obj = {
+			name: characters.get(chID).name,
+			children: dateMapArray,
+			character: characters.get(chID)
+		};
+		
+		createCircle(obj);
 		//bug nella creazione del grafo quando si cambia personaggio
 	});
 
@@ -213,10 +220,11 @@ let loadingData = async function(){
 	let dateMapArray = setupDatasetTimelineTree(edges, chID, characters);
 	let edgesSingularCharacter = createEdgesComics(ch2co, chID);
 	let graph = setupDatasetRelevance(edgesSingularCharacter, chID, characters, 1);
-/*	let obj = {
+	let obj = {
 		name: characters.get(chID).name,
-		children: dateMapArray
-	}*/
+		children: dateMapArray,
+		character: characters.get(chID)
+	}
 	console.log(dateMapArray);
 	createChart(dateMapArray, characters.get(chID));
 	console.log(graph);
@@ -226,7 +234,7 @@ let loadingData = async function(){
 //	console.log(partition);
 
 //	partition.each(x => x.current = x);
-//	createCircle(obj);
+	createCircle(obj);
 /*	setTimeout(() => {
 		console.log('aggiornare');
 		let mapArray = setupDatasetTimelineTree(edges, 1009220 ,characters);

@@ -118,6 +118,8 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 	let goodFemale = [];
 	let badMale = [];
 	let badFemale = [];
+	let neutralMale = [];
+	let neutralFemale = [];
 	let notDefined = [];
 	for(let k = 0; k < newArrayCharacters.length; k++){
 	//	console.log(newArrayCharacters[k].characterID);
@@ -130,26 +132,45 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 	//	console.log(character);
 		if(character.alignment !== undefined){
 			switch(character.alignment.toLowerCase()){
-				case "good": 
+				case "good":{ 
 					switch(character.gender.toLowerCase()){
-						case "male": 
+						case "male":{
 							goodMale.push(obj);
 							break;
-						case "female": 
+						} 
+						case "female":{
 							goodFemale.push(obj);
 							break;
+						} 
 					}
 					break;
-				case "bad": 
+				}
+				case "bad":{
 					switch(character.gender.toLowerCase()){
-						case "male": 
+						case "male":{
 							badMale.push(obj);
 							break;
-						case "female": 
+						} 
+						case "female":{
 							badFemale.push(obj);
-							break
+							break;
+						}
 					}
 					break;
+				} 
+				case "neutral":{
+					switch(character.gender.toLowerCase()){
+						case "male":{
+							neutralMale.push(obj);
+							break;
+						}
+						case "female":{
+							neutralFemale.push(obj);
+							break;
+						}
+
+					}
+				}	
 			}
 		}else{
 			notDefined.push(obj);
@@ -164,26 +185,46 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 			name: "Good",
 			children: [{
 				name: "Male",
-				children: goodMale
+				children: goodMale,
+				opacity: 0.8
 			},{
 				name: "Female",
-				children: goodFemale
-			}]
+				children: goodFemale,
+				opacity: 0.6
+			}],
+			color: colorList[0]
 		},{
 			name: "Bad",
 			children: [{
 				name: "Male",
-				children: badMale
+				children: badMale,
+				opacity: 0.8
 			},{
 				name: "Female",
-				children: badFemale
-			}]
+				children: badFemale,
+				opacity: 0.6
+			}],
+			color: colorList[2]
+		},{
+			name: "Neutral",
+			children: [{
+				name: "Male",
+				children: neutralMale,
+				opacity: 0.8
+			},{
+				name: "Female",
+				children: neutralFemale,
+				opacity: 0.6
+			}],
+			color: colorList[3]
 		},{
 			name: "NotDefined",
 			children: [{
 				name: "Not Defined",
-				children: notDefined
-			}]
+				children: notDefined,
+				opacity: 0.5
+			}],
+			color: colorList[1]
 		}]
 	};
 	return node;
