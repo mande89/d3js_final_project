@@ -1,9 +1,7 @@
+
 var setupDatasetRelevance = function(edges, chID, charactersMap, size){
-	console.log(edges);
-	console.log(edges);
-	console.log(size);
+	
 	let edgesNoReplicas = getEdgesNoReplicasWithTimes(edges);
-	console.log(edgesNoReplicas);
 	let arrayCharacters = [];
 	let characters = new Map(); 
 	edges.forEach((x) => {
@@ -56,19 +54,15 @@ var setupDatasetRelevance = function(edges, chID, charactersMap, size){
 			return +1;
 		}
 	});
-	console.log(arraySize);
 	arrayCharacters = arrayCharacters.slice(0, arraySize);
 
 	let arrayMapApp = new Map();
 	arrayCharacters.forEach((x) => {
 		arrayMapApp.set(x.characterID, x);
 	});
-	console.log(arrayMapApp);
-	console.log(edgesNoReplicas);
 	edgesNoReplicas = edgesNoReplicas.filter((x) => {
 		return ((arrayMapApp.has(x.target))&&(arrayMapApp.has(x.source)));
 	});
-
 	let obj = {
 		edges: edgesNoReplicas,
 		characters: arrayCharacters
@@ -77,16 +71,15 @@ var setupDatasetRelevance = function(edges, chID, charactersMap, size){
 }
 
 var createGraph = function(data){
-//	let color = d3.scaleOrdinal(d3.schemeCategory20);
+
 	svg2.selectAll('*').remove();
-//	let min = d3.min(data.characters, (x) => {return x.times});
 	let rScaling = d3.scaleLinear().domain([d3.min(data.characters, (x) => {return x.value}), d3.max(data.characters, (x) => {return x.value})]).range([2, 15]);
 	let eScaling = d3.scaleLinear().domain([d3.min(data.edges, (x) => {return x.times}), d3.max(data.edges, (x) => {return x.times})]).range([0.01, 0.4]);
 
 	let simulation = d3.forceSimulation().force('link', d3.forceLink().id((x) => { return x.characterID; })).force('charge', d3.forceManyBody().distanceMax(screenHeight * 0.4).strength(-50)).force('center', d3.forceCenter(screenWidth / 2, screenWidth + (screenHeight * 0.5))).force('collision', d3.forceCollide((x) => {return rScaling(x.value) * 2;}).iterations(300).strength(1));
 	let edge = svg2.append("g").attr('class', 'edge').selectAll('line').data(data.edges).enter().append('line').attr('stroke-width', (x) => { return eScaling(x.times)}).attr('stroke', '#f1efe2');
 	let node = svg2.append("g").attr('class', 'node').selectAll('g').data(data.characters).enter().append('g');
-	//usare la funzione d3.scale;
+	
 	let nodeDraw = node.append('circle').attr('r', (x) => {return rScaling(x.value)}).attr('fill', (x) => {
 		if(x.alignment !== undefined){
 			if(x.alignment.toLowerCase() === 'good'){
@@ -100,7 +93,7 @@ var createGraph = function(data){
 			return colorList[1];
 		}
 	}).on('click', (x) => {
-		console.log(x);
+
 		$('#heroName').text(x.name);
 		((x.gender !== undefined)&&(x.gender !== "")) ? $('#heroGender').text(x.gender) : $('#heroGender').text('N/A');
 		((x.alignment !== undefined)&&(x.alignment !== "")) ? $('#heroAlignment').text(x.alignment) : $('#heroAlignment').text('N/A');
@@ -108,11 +101,9 @@ var createGraph = function(data){
 
 	});
 
-//	let desc = node.append('text').text((x) => { return x.name }).attr('x', 6).attr('y', 3);
-//	node.append('title').text((x) => {return x.name});
 	let numberIteration = 0;
 	let change = function(){
-	//	console.log(numberIteration);
+
 		if(numberIteration === 10){
 			simulation.stop();
 		}
@@ -125,8 +116,5 @@ var createGraph = function(data){
 
 	simulation.nodes(data.characters).on('tick', change);
 	simulation.force('link').links(data.edges);
-
-	
-
 
 }

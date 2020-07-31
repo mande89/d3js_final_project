@@ -12,10 +12,48 @@ body {
 
 .nav-custom{
 	width: 70% !important;
+	margin-left: 100px;
+}
+
+.footer-text{
+	color: #fffff0;
+	font-size: 14px;
+}
+
+.box-legend{
+	width: 100%;
+	height: 100%;
+}
+
+.legend{
+	margin-top: 40px;
+}
+
+.row-legend{
+	padding-top: 0.5%;
+	padding-bottom: 0.5%;
+	color: white;
+	text-align: right;
+}
+
+.good{
+	background-color: #49a4e0;
+}
+
+.bad{
+	background-color: #e04949;
+}
+
+.neutral{
+	background-color: #ada5c3;
+}
+
+.notdefined{
+	background-color: #d7d6da;
 }
 
 .table-custom{
-	margin-top: 150px;
+	margin-top: 80px;
 }
 
 .table{
@@ -23,7 +61,7 @@ body {
 }
 
 .label{
-	font-size: 12px;
+	font-size: 9px;
 	user-select: none;
 }
 
@@ -88,4 +126,5 @@ body {
 .info{
 	width: 500px;
 }
+
 

@@ -17,7 +17,6 @@ var createEdges = function(ch2co){
 				}
 			}
 			if(appList.length > 1){
-				//dobbiamo creare tutti i vari accoppiamenti
 				for (let h = 0; h < appList.length; h++){
 					for(let k = h + 1; k < appList.length; k++){
 						let objToInsert = {
@@ -28,16 +27,9 @@ var createEdges = function(ch2co){
 							k1: 1,
 							k2: 1
 						}
-					/*	let objToInsertInverse = {
-							character1: appList[k].characterID,
-							character2: appList[h].characterID
-						};*/
-					//	if((!edges.includes(objToInsert))&&(!edges.includes(objToInsertInverse))){
-							edges.push(objToInsert);
-					//	}
+						edges.push(objToInsert);
 					}
 				}
-			//	console.log(edges);
 			}
 		}
 	}
@@ -77,7 +69,6 @@ var getEdgesNoReplicasWithTimes = function(edges){
 				mapEdges.set(inverseKey, obj);
 			}
 		}else{
-			//da aggiungere
 			let obj = {
 				target: edges[i].character1,
 				source: edges[i].character2,
@@ -96,7 +87,6 @@ var getEdgesNoReplicasWithTimes = function(edges){
 
 var createEdgesComics = function(ch2co, chID){
 	let mapComics = new Map();
-	console.log(ch2co.length);
 	let ch2coSingleCharacter = ch2co.filter((x) => {
 		if((x.characterID === chID)&&(!mapComics.has(x.comicID))){
 			mapComics.set(x.comicID, x);	
@@ -106,9 +96,7 @@ var createEdgesComics = function(ch2co, chID){
 	let ch2coFiltered = ch2co.filter((x) => {
 		return(mapComics.has(x.comicID));
 	})
-	console.log(ch2coFiltered);
 	let edges = createEdges(ch2coFiltered);
-	console.log(edges);
 	return edges;
 
 }
@@ -122,14 +110,11 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 	let neutralFemale = [];
 	let notDefined = [];
 	for(let k = 0; k < newArrayCharacters.length; k++){
-	//	console.log(newArrayCharacters[k].characterID);
-
 		let character = charactersMap.get(newArrayCharacters[k].characterID);
 		let obj = {
 			value: newArrayCharacters[k].times,
 			name: character.name
 		};
-	//	console.log(character);
 		if(character.alignment !== undefined){
 			switch(character.alignment.toLowerCase()){
 				case "good":{ 
@@ -175,8 +160,6 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 		}else{
 			notDefined.push(obj);
 		}
-		
-
 	}
 	let node = {
 		name: date,
@@ -190,7 +173,7 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 			},{
 				name: "Female",
 				children: goodFemale,
-				opacity: 0.6
+				opacity: 0.7
 			}],
 			color: colorList[0]
 		},{
@@ -202,7 +185,7 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 			},{
 				name: "Female",
 				children: badFemale,
-				opacity: 0.6
+				opacity: 0.7
 			}],
 			color: colorList[2]
 		},{
@@ -214,7 +197,7 @@ var createSingleNode = function(newArrayCharacters, charactersMap, date){
 			},{
 				name: "Female",
 				children: neutralFemale,
-				opacity: 0.6
+				opacity: 0.7
 			}],
 			color: colorList[3]
 		},{
@@ -244,11 +227,9 @@ var removeDuplicates = function(array){
 		let key = array[i].character1.toString() + "|" + array[i].character2.toString();
 		let inverseKey = array[i].character2.toString() + "|" + array[i].character1.toString();
 		if((!mapApp.has(key))&&(!mapApp.has(inverseKey))){
-		//	console.log('da aggiungere');
 			edges.push(array[i]);
 			mapApp.set(key, array[i]);
 		}
 	}
-//	console.log(edges);
 	return(edges);
 }
